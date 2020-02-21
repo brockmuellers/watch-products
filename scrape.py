@@ -3,6 +3,7 @@
 from bs4 import BeautifulSoup
 import csv
 import requests
+import os
 import time
 
 
@@ -39,6 +40,30 @@ def write_available_products(results, label, target_dir):
         [file.write(r + "\n") for r in results]
 
 
+# Print old and new product lists, if this one differs from the last.
+def compare_to_previous_products(current_products, label, target_dir):
+    sorted_results_files = sorted(os.listdir(target_dir))
+    previous_files = [f for f in sorted_results_files if label in f]
+
+    print("\nRESULT:")
+
+    if not previous_files:
+        print("No difference found for product " + label + " (this is the first search)")
+        return
+
+    with open(target_dir + previous_files[-1], 'r') as file:
+        previous_products = file.read().splitlines()
+
+    if sorted(previous_products) != sorted(current_products):
+        print("FOUND A DIFFERENCE FOR PRODUCT {} (from {})".format(
+            label, previous_files[-1]))
+        print("OLD: " + str(previous_products))
+        print("NEW: " + str(current_products))
+
+    else:
+        print("No difference found for product " + label)
+
+
 def scrape_rei_used_gear():
     labeled_urls = open_search_urls(REI_USED_SEARCH_URL_FILE)
 
@@ -49,6 +74,8 @@ def scrape_rei_used_gear():
         label = labeled_url["label"]
         url = labeled_url["url"]
 
+        print("\n----------------------------\n")
+        print("EXAMINING PRODUCT " + label)
         print("Examining search \"{}\" with URL: {}".format(label, url))
 
         # Load the page and parse out search result items
@@ -58,22 +85,31 @@ def scrape_rei_used_gear():
         # Make sure we have the same number of items the page says we should have
         # This might fail if the search results are paginated, and not all are loaded
         expected_count_div = search_soup.find("div", class_="count")
-        expected_count = int(expected_count_div.find("span").contents[0])
-        if len(items) != expected_count:
-            raise AssertionError(
-                "Error on page {}: found {} items, but page said there would be {}".format(
-                    url, len(items, expected_count)))
 
-        # Handle each individual item, and add to available_products list
-        for item in items:
-            title = item.find_all("span", class_="title")[0].contents[0]
-            print("Found product " + title)
+        # Nothing was found for this search
+        if expected_count_div is None:
+            print("No products found.")
 
-            available_products.append(title)
+        else:
+            expected_count = int(expected_count_div.find("span").contents[0])
+            if len(items) != expected_count:
+                raise AssertionError(
+                    "Error on page {}: found {} items, but page said there would be {}".format(
+                        url, len(items, expected_count)))
 
-            # Get the URL in case you want to explore it; this is real brittle
-            # item_path = item.find_all("a")[0]['href']
-            # item_url = "http://www.rei.com" + item_path
+            # Handle each individual item, and add to available_products list
+            for item in items:
+                title = item.find_all("span", class_="title")[0].contents[0]
+                print("Found product " + title)
+
+                available_products.append(title)
+
+                # Get the URL in case you want to explore it; this is real brittle
+                # item_path = item.find_all("a")[0]['href']
+                # item_url = "http://www.rei.com" + item_path
+
+        # Compare to the previous list of products.
+        compare_to_previous_products(available_products, label, REI_USED_RESULTS_DIR)
 
         # Write list of available products to a timestamped file
         write_available_products(available_products, label, REI_USED_RESULTS_DIR)
