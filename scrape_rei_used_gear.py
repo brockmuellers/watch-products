@@ -23,31 +23,34 @@ def scrape():
         search_soup = scrape_utils.get_soup(url)
         items = search_soup.find_all("li", class_="TileItem")
 
-        # Make sure we have the same number of items the page says we should have
-        # This might fail if the search results are paginated, and not all are loaded
+        # The number of search results the page thinks we should have
         expected_count_div = search_soup.find("div", class_="count")
 
-        # Nothing was found for this search
         if expected_count_div is None:
+            # Nothing was found for this search
             print("No products found.")
-
+            expected_count = 0
         else:
             expected_count = int(expected_count_div.find("span").contents[0])
-            if len(items) != expected_count:
-                raise AssertionError(
-                    "Error on page {}: found {} items, but page said there would be {}".format(
-                        url, len(items, expected_count)))
 
-            # Handle each individual item, and add to available_products list
-            for item in items:
-                title = item.find_all("span", class_="title")[0].contents[0]
-                print("Found product " + title)
+        # Make sure we have the same number of items the page says we should have
+        # This might fail if the search results are paginated, and not all are loaded,
+        # or if the page structure changes
+        if len(items) != expected_count:
+            raise AssertionError(
+                "Error on page {}: found {} items, but page said there would be {}".format(
+                    url, len(items, expected_count)))
 
-                available_products.append(title)
+        # Handle each individual item, and add to available_products list
+        for item in items:
+            title = item.find_all("span", class_="title")[0].contents[0]
+            print("Found product " + title)
 
-                # Get the URL in case you want to explore it; this is real brittle
-                # item_path = item.find_all("a")[0]['href']
-                # item_url = "http://www.rei.com" + item_path
+            available_products.append(title)
+
+            # Get the URL in case you want to explore it; this is real brittle
+            # item_path = item.find_all("a")[0]['href']
+            # item_url = "http://www.rei.com" + item_path
 
         # Compare to the previous list of products, and save this list for future comparisons..
         scrape_utils.compare_and_save_products(available_products, label, REI_USED_RESULTS_DIR)
