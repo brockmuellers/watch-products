@@ -1,4 +1,4 @@
-# find-products
+# watch-products
 
 I want to know when products that I'm interested in become available on the REI used gear website. I'd like to apply this to other websites too.
 
