@@ -11,3 +11,7 @@ TODO: run on lambda, deploy via AWS CLI? Maybe save result files to S3. This can
 TODO: figure out better display for comparison results.
 
 TODO: clear out old saved result files periodically.
+
+TODO: tests would be nice, if this tool lasts.
+
+There are also some experimental web scraper scripts in here.
