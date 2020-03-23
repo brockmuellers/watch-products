@@ -5,7 +5,9 @@ REI_USED_SEARCH_URL_FILE = "rei_used_search_urls.csv"
 REI_USED_RESULTS_DIR = "results/rei_used/"
 
 
+# Messy logic, specific to the REI website.
 def scrape():
+    # Load file of URLs to scrape, which are search result pages
     labeled_urls = scrape_utils.open_search_urls(REI_USED_SEARCH_URL_FILE)
 
     for labeled_url in labeled_urls:
@@ -23,7 +25,7 @@ def scrape():
         search_soup = scrape_utils.get_soup(url)
         items = search_soup.find_all("li", class_="TileItem")
 
-        # The number of search results the page thinks we should have
+        # The number of search results the page thinks we should have (for validation)
         expected_count_div = search_soup.find("div", class_="count")
 
         if expected_count_div is None:
@@ -34,8 +36,8 @@ def scrape():
             expected_count = int(expected_count_div.find("span").contents[0])
 
         # Make sure we have the same number of items the page says we should have
-        # This might fail if the search results are paginated, and not all are loaded,
-        # or if the page structure changes
+        # This might throw an error if the search results are paginated, and not
+        # all are loaded, or if the page structure changes
         if len(items) != expected_count:
             raise AssertionError(
                 "Error on page {}: found {} items, but page said there would be {}".format(

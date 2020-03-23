@@ -48,7 +48,7 @@ def get_plant_heights():
     for link in plant_links:
         if i > 10000:
             break
-        i+=1
+        i += 1
         plant_soup = scrape_utils.get_soup(link)
 
         plant_name = plant_soup.find("div", class_="product-name").find("h1").text
@@ -76,7 +76,7 @@ def load_plant_heights_map():
             print(row)
             height = row[0]
             plant_name = row[1]
-            link = row[2]
+            # link = row[2]
 
             if height not in heights_map:
                 heights_map[height] = []

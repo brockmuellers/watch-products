@@ -10,8 +10,7 @@ SHOULD_SEND_EMAIL = os.getenv("FIND_PRODUCTS_SHOULD_SEND_EMAIL")
 
 
 # Expects CSV file with rows [$SEARCH_LABEL,$SEARCH_URL]
-# Label must be a valid unix directory name.
-# This is a little funny.
+# Label must be a valid unix directory name. This is a little odd.
 # Returns list of dicts {"label": $SEARCH_LABEL, "url": $SEARCH_URL}
 def open_search_urls(filename):
     print("Opening search URL file " + filename)
@@ -71,6 +70,7 @@ def _compare_to_previous_products(current_products, label, target_dir):
         print("No difference found for product " + label)
 
 
+# TODO: implement me!
 def _send_email():
     print("Sending email")
     return
